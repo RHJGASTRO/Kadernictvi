@@ -2,9 +2,10 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y libsqlite3-dev \
     && docker-php-ext-install pdo pdo_sqlite
 
-# Nastavení kořenového adresáře Apache na /var/www/html
-RUN sed -i 's!/var/www/html!/var/www/html!g' /etc/apache2/sites-available/000-default.conf
-RUN sed -i 's!/var/www/!/var/www/html/!g' /etc/apache2/apache2.conf
+# Změna kořenového adresáře Apache přímo na složku s aplikací
+ENV APACHE_DOCUMENT_ROOT /var/www/html
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 COPY . /var/www/html/
 RUN chown -R www-data:www-data /var/www/html/
